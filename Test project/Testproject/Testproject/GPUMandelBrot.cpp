@@ -110,31 +110,29 @@ int main() {
 	checkError(ret, "could not create kernel");
 
 	// Set kernel arguments //
-	ret = clSetKernelArg(kernel, 0, sizeof(float), &OFFSET_X);
+	ret = clSetKernelArg(kernel, 0, sizeof(float), (void *)&OFFSET_X);
 	checkError(ret, "could not set variable 'OFFSET_X'");
 
-	ret = clSetKernelArg(kernel, 1, sizeof(float), &OFFSET_Y);
+	ret = clSetKernelArg(kernel, 1, sizeof(float), (void *)&OFFSET_Y);
 	checkError(ret, "could not set variable 'OFFSET_Y'");
 
 	float stepSize = (float)1 / ZOOMFACTOR;
-	ret = clSetKernelArg(kernel, 2, sizeof(float), &stepSize);
+	ret = clSetKernelArg(kernel, 2, sizeof(float), (void *)&stepSize);
 	checkError(ret, "could not set variable 'stepSize'");
 
-	ret = clSetKernelArg(kernel, 3, sizeof(unsigned int), &MAX_ITERATIONS);
+	ret = clSetKernelArg(kernel, 3, sizeof(unsigned int), (void *)&MAX_ITERATIONS);
 	checkError(ret, "could not set variable 'MAX_ITERATIONS'");
 
-	//ret = clSetKernelArg(kernel, 4, WIDTH*HEIGHT*sizeof(mandelbrot_color), framebufferOnDevice);
-	ret = clSetKernelArg(kernel, 4, sizeof(cl_mem), (void*)&framebufferOnDevice);
+	ret = clSetKernelArg(kernel, 4, sizeof(cl_mem), (void *)&framebufferOnDevice);
 	checkError(ret, "could not set variable 'framebuffer'");
 
-	//ret = clSetKernelArg(kernel, 5, COLORTABLE_SIZE*sizeof(mandelbrot_color), colorTableOnDevice);
-	ret = clSetKernelArg(kernel, 5, sizeof(cl_mem), (void*)&colorTableOnDevice);
+	ret = clSetKernelArg(kernel, 5, sizeof(cl_mem), (void *)&colorTableOnDevice);
 	checkError(ret, "could not set variable 'colortable2'");
 
-	ret = clSetKernelArg(kernel, 6, sizeof(unsigned int), &WIDTH);
+	ret = clSetKernelArg(kernel, 6, sizeof(unsigned int), (void *)&WIDTH);
 	checkError(ret, "could not set variable 'WIDTH'");
 
-	ret = clSetKernelArg(kernel, 7, sizeof(unsigned int), &HEIGHT);
+	ret = clSetKernelArg(kernel, 7, sizeof(unsigned int), (void *)&HEIGHT);
 	checkError(ret, "could not set variable 'HEIGHT'");
 
 	// Enqueue ND range kernel

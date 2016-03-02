@@ -10,8 +10,8 @@ __kernel void mandelbrot_frame(
 	const unsigned int window_width,
 	const unsigned int window_height)
 {	
-	float windowPosX = (float)get_global_id(0);
-	float windowPosY = (float)get_global_id(1);
+	int windowPosX = get_global_id(0);
+	int windowPosY = get_global_id(1);
 
 	float center_X = -(stepsize*window_width / 2);
 	float center_Y = (stepsize*window_height / 2);
@@ -42,7 +42,6 @@ __kernel void mandelbrot_frame(
 
 	// Output black if we never finished, and a color from the look up table otherwise
 	mandelbrot_color black = { 0,0,0 };
-	int arrayIndex = (int)(window_width * windowPosY + windowPosX);
-	framebuffer[arrayIndex] = (iterations == max_iterations) ? black : colortable[iterations];
-	//printf("framebuffer[%u]: %f\n", arrayIndex, framebuffer[arrayIndex]);
+	//mandelbrot_color black = colortable[255];
+	framebuffer[(window_width * windowPosY + windowPosX)] = (iterations == max_iterations) ? black : colortable[iterations];
 }
