@@ -30,6 +30,9 @@ cl_uint ret_num_devices;
 cl_uint ret_num_platforms;
 cl_int ret;
 
+cl_mem colorTableOnDevice = NULL;
+cl_mem framebufferOnDevice = NULL;
+
 void create_colortable()
 {
 	// Initialize color table values
@@ -91,52 +94,56 @@ int main() {
 	context = clCreateContext(NULL, 1, &device_id, NULL, NULL, &ret);
 	checkError(ret, "could not create context");
 
-	// Build the openCL kernel program
-	program = build_program(context, device_id, "./mandelbrot.cl");
-
 	// Create command queue for device
 	command_queue = clCreateCommandQueue(context, device_id, 0, &ret);
 	checkError(ret, "could not create command queue");
 
 	// Allocate memory on device //
-	cl_mem colorTableOnDevice = clCreateBuffer(context, CL_MEM_READ_WRITE, COLORTABLE_SIZE*sizeof(mandelbrot_color), NULL, &ret);
+	colorTableOnDevice = clCreateBuffer(context, CL_MEM_READ_WRITE, (WIDTH*HEIGHT) * sizeof(mandelbrot_color), NULL, &ret);
 	checkError(ret, "could not allocate memory on device for colortable");
 
-	cl_mem framebufferOnDevice = clCreateBuffer(context, CL_MEM_READ_WRITE, WIDTH*HEIGHT*sizeof(mandelbrot_color), NULL, &ret);
+	framebufferOnDevice = clCreateBuffer(context, CL_MEM_READ_WRITE, (WIDTH*HEIGHT) * sizeof(mandelbrot_color), NULL, &ret);
 	checkError(ret, "could not allocate memory on device for framebuffer");
+
+	ret = clEnqueueWriteBuffer(command_queue, colorTableOnDevice, CL_TRUE, 0, (WIDTH*HEIGHT) * sizeof(mandelbrot_color), colortable2, 0, NULL, NULL);
+	checkError(ret, "could not write colortable to device");
+
+	// Build the openCL kernel program
+	program = build_program(context, device_id, "./mandelbrot.cl");
 
 	// Build kernel from compiled openCL program //
 	kernel = clCreateKernel(program, "mandelbrot_frame", &ret);
 	checkError(ret, "could not create kernel");
 
 	// Set kernel arguments //
-	ret = clSetKernelArg(kernel, 0, sizeof(float), (void *)&OFFSET_X);
+	ret = clSetKernelArg(kernel, 0, sizeof(float), (void *) &OFFSET_X);
 	checkError(ret, "could not set variable 'OFFSET_X'");
 
-	ret = clSetKernelArg(kernel, 1, sizeof(float), (void *)&OFFSET_Y);
+	ret = clSetKernelArg(kernel, 1, sizeof(float), (void *) &OFFSET_Y);
 	checkError(ret, "could not set variable 'OFFSET_Y'");
 
 	float stepSize = (float)1 / ZOOMFACTOR;
-	ret = clSetKernelArg(kernel, 2, sizeof(float), (void *)&stepSize);
+	ret = clSetKernelArg(kernel, 2, sizeof(float), (void *) &stepSize);
 	checkError(ret, "could not set variable 'stepSize'");
 
-	ret = clSetKernelArg(kernel, 3, sizeof(unsigned int), (void *)&MAX_ITERATIONS);
+	ret = clSetKernelArg(kernel, 3, sizeof(unsigned int), (void *) &MAX_ITERATIONS);
 	checkError(ret, "could not set variable 'MAX_ITERATIONS'");
 
-	ret = clSetKernelArg(kernel, 4, sizeof(cl_mem), (void *)&framebufferOnDevice);
+	ret = clSetKernelArg(kernel, 4, sizeof(cl_mem), (void *) &framebufferOnDevice);
 	checkError(ret, "could not set variable 'framebuffer'");
 
-	ret = clSetKernelArg(kernel, 5, sizeof(cl_mem), (void *)&colorTableOnDevice);
+	ret = clSetKernelArg(kernel, 5, sizeof(cl_mem), (void *) &colorTableOnDevice);
 	checkError(ret, "could not set variable 'colortable2'");
 
-	ret = clSetKernelArg(kernel, 6, sizeof(unsigned int), (void *)&WIDTH);
+	ret = clSetKernelArg(kernel, 6, sizeof(unsigned int), (void *) &WIDTH);
 	checkError(ret, "could not set variable 'WIDTH'");
 
-	ret = clSetKernelArg(kernel, 7, sizeof(unsigned int), (void *)&HEIGHT);
+	ret = clSetKernelArg(kernel, 7, sizeof(unsigned int), (void *) &HEIGHT);
 	checkError(ret, "could not set variable 'HEIGHT'");
 
 	// Enqueue ND range kernel
-	size_t globalSize[] = { WIDTH, HEIGHT }, localSize[] = { 10, 10 };
+	size_t globalSize[] = { WIDTH, HEIGHT };
+	size_t localSize[] = { 10, 10 };
 	ret = clEnqueueNDRangeKernel
 		(command_queue,
 		kernel,
@@ -150,8 +157,10 @@ int main() {
 		);
 	checkError(ret, "Could not enqueue 2D range on kernel");
 
+	clFinish(command_queue);
+
 	// Enqueue readbuffer
-	ret = clEnqueueReadBuffer(command_queue, framebufferOnDevice, CL_TRUE, 0, WIDTH*HEIGHT*sizeof(mandelbrot_color), frameBuffer, 0, NULL, NULL);
+	ret = clEnqueueReadBuffer(command_queue, framebufferOnDevice, CL_TRUE, 0, (WIDTH*HEIGHT) * sizeof(mandelbrot_color), frameBuffer, 0, NULL, NULL);
 	checkError(ret, "Could not request output from device");
 
 	// Get current time after calculating the fractal
@@ -165,6 +174,15 @@ int main() {
 
 	// Write image to file
 	image.save_image("fractal_output.bmp");
+
+	ret = clFlush(command_queue);
+	ret = clFinish(command_queue);
+	ret = clReleaseKernel(kernel);
+	ret = clReleaseProgram(program);
+	ret = clReleaseMemObject(framebufferOnDevice);
+	ret = clReleaseMemObject(colorTableOnDevice);
+	ret = clReleaseCommandQueue(command_queue);
+	ret = clReleaseContext(context);
 
 	// Show image in mspaint
 	WinExec("mspaint fractal_output.bmp", SW_MAXIMIZE);

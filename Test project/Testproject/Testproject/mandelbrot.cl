@@ -1,14 +1,14 @@
 #include "mandelbrot_frame.h"
 
 __kernel void mandelbrot_frame(
-	const float x0,
-	const float y0,
-	const float stepsize,
-	const unsigned int max_iterations,
+	float x0,
+	float y0,
+	float stepsize,
+	unsigned int max_iterations,
 	__global mandelbrot_color *framebuffer,
 	__global const mandelbrot_color *colortable,
-	const unsigned int window_width,
-	const unsigned int window_height)
+	unsigned int window_width,
+	unsigned int window_height)
 {	
 	int windowPosX = get_global_id(0);
 	int windowPosY = get_global_id(1);
@@ -42,6 +42,5 @@ __kernel void mandelbrot_frame(
 
 	// Output black if we never finished, and a color from the look up table otherwise
 	mandelbrot_color black = { 0,0,0 };
-	//mandelbrot_color black = colortable[255];
 	framebuffer[(window_width * windowPosY + windowPosX)] = (iterations == max_iterations) ? black : colortable[iterations];
 }
