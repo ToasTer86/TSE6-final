@@ -13,7 +13,7 @@
 #define MAX_ITERATIONS 1024
 #define COLORTABLE_SIZE 1024 
 
-mandelbrot_color colortable2[COLORTABLE_SIZE];
+/*mandelbrot_color colortable2[COLORTABLE_SIZE];
 
 void create_colortable()
 {
@@ -45,7 +45,7 @@ void create_colortable()
 			colortable2[i] = color_entry;
 		}
 	}
-}
+}*/
 
 /*int main() {
 

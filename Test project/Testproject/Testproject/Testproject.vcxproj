@@ -182,6 +182,7 @@
     <ClCompile Include="arrayAdditionMain.cpp" />
     <ClCompile Include="CPUMandelbrot.cpp" />
     <ClCompile Include="GetPlatforms.cpp" />
+    <ClCompile Include="GPUMandelBrot.cpp" />
     <ClCompile Include="helloWorldMain.cpp" />
     <ClCompile Include="mandelbrot_frame.cpp" />
     <ClCompile Include="opencl_utils.cpp" />
@@ -189,6 +190,7 @@
   <ItemGroup>
     <Intel_OpenCL_Build_Rules Include="arrayAddition.cl" />
     <Intel_OpenCL_Build_Rules Include="helloWorld.cl" />
+    <Intel_OpenCL_Build_Rules Include="mandelbrot.cl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mandelbrot_frame.h" />

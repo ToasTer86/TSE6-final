@@ -33,12 +33,18 @@
     <ClCompile Include="opencl_utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GPUMandelBrot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Intel_OpenCL_Build_Rules Include="arrayAddition.cl">
       <Filter>OpenCL Files</Filter>
     </Intel_OpenCL_Build_Rules>
     <Intel_OpenCL_Build_Rules Include="helloWorld.cl">
+      <Filter>OpenCL Files</Filter>
+    </Intel_OpenCL_Build_Rules>
+    <Intel_OpenCL_Build_Rules Include="mandelbrot.cl">
       <Filter>OpenCL Files</Filter>
     </Intel_OpenCL_Build_Rules>
   </ItemGroup>

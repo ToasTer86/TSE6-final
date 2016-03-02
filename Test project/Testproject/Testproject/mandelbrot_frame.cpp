@@ -1,4 +1,5 @@
 #include "mandelbrot_frame.h"
+#include <CL/cl.h>
 
 void mandelbrot_frame(
 	const float x0,
@@ -13,7 +14,7 @@ void mandelbrot_frame(
 	for (int windowPosX = 0; windowPosX<window_width; windowPosX++)
 		for (int windowPosY = 0; windowPosY<window_height; windowPosY++)
 		{
-
+			
 			float center_X = -(stepsize*window_width / 2);
 			float center_Y = (stepsize*window_height / 2);
 			const float stepPosX = center_X - x0 + (windowPosX * stepsize);
