@@ -93,7 +93,7 @@ int main() {
 	std::cin >> ZOOMFACTOR;  
 	std::cout << "Enter localsize-x  for the desired mandelbrot image\n";
 	std::cin >> x;
-	std::cout << "Enter localsize-u  for the desired mandelbrot image\n";
+	std::cout << "Enter localsize-y  for the desired mandelbrot image\n";
 	std::cin >> y;
 
 	size_t localSize[] = { x, y };
@@ -208,12 +208,23 @@ int main() {
 	
 	system("pause");
 
-
 	// Write image to file
 	image.save_image("fractal_output.bmp");
 
 	// Show image in mspaint
 	WinExec("mspaint fractal_output.bmp", SW_MAXIMIZE);
 
-	return 0;
+	char rerun;
+
+	std::cout << "Do you want to run the program again? Y or N \n";
+	std::cin >> rerun;
+
+	if(rerun == 'Y')
+	{
+		return main();
+	}
+	else
+	{
+		return 0;
+	}
 }
