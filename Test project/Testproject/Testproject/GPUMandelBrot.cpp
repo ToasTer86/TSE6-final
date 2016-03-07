@@ -6,15 +6,15 @@
 #include <windows.h>
 #include <CL/cl.h>
 #include "opencl_utils.h"
+#include <iostream>
 
-
-#define ZOOMFACTOR 400
 #define COLORTABLE_SIZE 1024 
 
 mandelbrot_color colortable2[COLORTABLE_SIZE];
 
-unsigned int WIDTH = 800;
-unsigned int  HEIGHT = 600;
+unsigned int WIDTH = 1920;
+unsigned int  HEIGHT = 1080;
+unsigned int ZOOMFACTOR = 200;
 float OFFSET_X = 0.0;
 float OFFSET_Y = 0.0;
 unsigned int MAX_ITERATIONS = 1024;
@@ -29,6 +29,19 @@ cl_platform_id platform_id = NULL;
 cl_uint ret_num_devices;
 cl_uint ret_num_platforms;
 cl_int ret;
+
+//Fractal GPU timing
+cl_event timing_GPU;
+cl_ulong starttime, endtime;
+
+//Write GPU timing
+cl_event timing_WriteBuffer;
+cl_ulong starttimeWrite, endtimeWrite;
+
+//Read GPU timing
+cl_event timing_ReadBuffer;
+cl_ulong starttimeRead, endtimeRead;
+
 
 void create_colortable()
 {
@@ -69,16 +82,31 @@ int main() {
 	// Create the colortable and fill it with colors
 	create_colortable();
 
-	// Create an empty image
+	int x = 0;
+	int y = 0;
+
+	std::cout << "Enter width for the desired mandelbrot image\n";
+	std::cin >> WIDTH;
+	std::cout << "Enter height for the desired mandelbrot image\n";
+	std::cin >> HEIGHT; 
+	std::cout << "Enter zoomfactor for the desired mandelbrot image\n";
+	std::cin >> ZOOMFACTOR;  
+	std::cout << "Enter localsize-x  for the desired mandelbrot image\n";
+	std::cin >> x;
+	std::cout << "Enter localsize-u  for the desired mandelbrot image\n";
+	std::cin >> y;
+
+	size_t localSize[] = { x, y };
+
+	// Create an empty image //
 	bitmap_image image(WIDTH, HEIGHT);
 	mandelbrot_color * frameBuffer = (mandelbrot_color *)image.data();
 
-	// Get current time before calculating the fractal
+	// Get current time before calculating the fractal //
 	LARGE_INTEGER freq, start;
 	QueryPerformanceFrequency(&freq);
 	QueryPerformanceCounter(&start);
 
-	// Calculate the fractal
 	// Get Platform and Device Info //
 	ret = clGetPlatformIDs(1, &platform_id, &ret_num_platforms);
 	checkError(ret, "could not get platforms");
@@ -91,11 +119,11 @@ int main() {
 	context = clCreateContext(NULL, 1, &device_id, NULL, NULL, &ret);
 	checkError(ret, "could not create context");
 
-	// Build the openCL kernel program
+	// Build the openCL kernel program //
 	program = build_program(context, device_id, "./mandelbrot.cl");
 
-	// Create command queue for device
-	command_queue = clCreateCommandQueue(context, device_id, 0, &ret);
+	// Create command queue for device //
+	command_queue = clCreateCommandQueue(context, device_id, CL_QUEUE_PROFILING_ENABLE, &ret);
 	checkError(ret, "could not create command queue");
 
 	// Allocate memory on device //
@@ -104,6 +132,9 @@ int main() {
 
 	cl_mem framebufferOnDevice = clCreateBuffer(context, CL_MEM_READ_WRITE, WIDTH*HEIGHT*sizeof(mandelbrot_color), NULL, &ret);
 	checkError(ret, "could not allocate memory on device for framebuffer");
+
+	// write buffer //
+	ret = clEnqueueWriteBuffer(command_queue, colorTableOnDevice, CL_TRUE, 0, COLORTABLE_SIZE* sizeof(mandelbrot_color), colortable2, 0, NULL, &timing_WriteBuffer);
 
 	// Build kernel from compiled openCL program //
 	kernel = clCreateKernel(program, "mandelbrot_frame", &ret);
@@ -123,11 +154,9 @@ int main() {
 	ret = clSetKernelArg(kernel, 3, sizeof(unsigned int), &MAX_ITERATIONS);
 	checkError(ret, "could not set variable 'MAX_ITERATIONS'");
 
-	//ret = clSetKernelArg(kernel, 4, WIDTH*HEIGHT*sizeof(mandelbrot_color), framebufferOnDevice);
 	ret = clSetKernelArg(kernel, 4, sizeof(cl_mem), (void*)&framebufferOnDevice);
 	checkError(ret, "could not set variable 'framebuffer'");
 
-	//ret = clSetKernelArg(kernel, 5, COLORTABLE_SIZE*sizeof(mandelbrot_color), colorTableOnDevice);
 	ret = clSetKernelArg(kernel, 5, sizeof(cl_mem), (void*)&colorTableOnDevice);
 	checkError(ret, "could not set variable 'colortable2'");
 
@@ -138,7 +167,7 @@ int main() {
 	checkError(ret, "could not set variable 'HEIGHT'");
 
 	// Enqueue ND range kernel
-	size_t globalSize[] = { WIDTH, HEIGHT }, localSize[] = { 10, 10 };
+	size_t globalSize[] = { WIDTH, HEIGHT };
 	ret = clEnqueueNDRangeKernel
 		(command_queue,
 		kernel,
@@ -148,22 +177,37 @@ int main() {
 		localSize,
 		0,
 		NULL,
-		NULL
+		&timing_GPU
 		);
 	checkError(ret, "Could not enqueue 2D range on kernel");
 
 	// Enqueue readbuffer
-	ret = clEnqueueReadBuffer(command_queue, framebufferOnDevice, CL_TRUE, 0, WIDTH*HEIGHT*sizeof(mandelbrot_color), frameBuffer, 0, NULL, NULL);
+	ret = clEnqueueReadBuffer(command_queue, framebufferOnDevice, CL_TRUE, 0, WIDTH*HEIGHT*sizeof(mandelbrot_color), frameBuffer, 0, NULL, &timing_ReadBuffer);
 	checkError(ret, "Could not request output from device");
 
-	// Get current time after calculating the fractal
+	// TIMING CPU
 	LARGE_INTEGER end;
 	QueryPerformanceCounter(&end);
 
-	// Print elapsed time
+	// TIMING GPU
+	clFinish(command_queue);
+	clGetEventProfilingInfo(timing_GPU, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &starttime, NULL);
+	clGetEventProfilingInfo(timing_GPU, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &endtime, NULL);
+
+	//TIMING READ & WRITE BUFFER
+	clGetEventProfilingInfo(timing_WriteBuffer, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &starttimeWrite, NULL);
+	clGetEventProfilingInfo(timing_WriteBuffer, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &endtimeWrite, NULL);
+	clGetEventProfilingInfo(timing_ReadBuffer, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &starttimeRead, NULL);
+	clGetEventProfilingInfo(timing_ReadBuffer, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &endtimeRead, NULL);
+
+	// PRINT TIME CPU
 	printf("Elapsed time to calculate fractal: %f msec\n", (double)(end.QuadPart - start.QuadPart) / freq.QuadPart * 1000.0);
-	printf("Press ENTER to continue...\n");
-	getchar();
+	printf("Kernel execution took %f msec\n", (float)(endtime - starttime)/100000);
+	printf("Writing of buffer took %f msec\n", (float)(endtimeWrite - starttimeWrite) / 100000);
+	printf("Reading of buffer took %f msec\n", (float)(endtimeRead - starttimeRead) / 100000);
+	
+	system("pause");
+
 
 	// Write image to file
 	image.save_image("fractal_output.bmp");

@@ -1,4 +1,8 @@
-#include "mandelbrot_frame.h"
+//#include "mandelbrot_frame.h"
+
+typedef struct {
+	unsigned char blue, green, red;
+} mandelbrot_color; 
 
 __kernel void mandelbrot_frame(
 	const float x0,
