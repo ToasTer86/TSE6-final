@@ -113,15 +113,15 @@
       <Device>0</Device>
     </Intel_OpenCL_Build_Rules>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(INTELOCLSDKROOT)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\TSE6-final\Test project\freeglut-2.8.1;D:\TSE6-final\Test project\freeglut-2.8.1\lib\x86\Debug;$(INTELOCLSDKROOT)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>Win32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeader />
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(INTELOCLSDKROOT)lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\TSE6-final\Test project\freeglut-2.8.1\lib;$(INTELOCLSDKROOT)lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>OpenCL.lib;freeglut.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
@@ -179,23 +179,22 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="arrayAdditionMain.cpp" />
-    <ClCompile Include="CPUMandelbrot.cpp" />
+    <ClCompile Include="color_table.cpp" />
     <ClCompile Include="GetPlatforms.cpp" />
     <ClCompile Include="GPUMandelBrot.cpp" />
-    <ClCompile Include="helloWorldMain.cpp" />
     <ClCompile Include="mandelbrot_frame.cpp" />
     <ClCompile Include="opencl_utils.cpp" />
+    <ClCompile Include="OpenGL_functions.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Intel_OpenCL_Build_Rules Include="arrayAddition.cl" />
-    <Intel_OpenCL_Build_Rules Include="helloWorld.cl" />
     <Intel_OpenCL_Build_Rules Include="mandelbrot.cl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="color_table.h" />
     <ClInclude Include="mandelbrot_frame.h" />
     <ClInclude Include="opencl_utils.h" />
     <ClInclude Include="bitmap_image.hpp" />
+    <ClInclude Include="OpenGL_functions.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

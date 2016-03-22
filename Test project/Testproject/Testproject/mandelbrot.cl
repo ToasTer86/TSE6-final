@@ -4,13 +4,14 @@ typedef struct {
 	unsigned char blue, green, red;
 } mandelbrot_color; 
 
+
 __kernel void mandelbrot_frame(
 	const float x0,
 	const float y0,
 	const float stepsize,
 	const unsigned int max_iterations,
-	__global mandelbrot_color *framebuffer,
-	__global const mandelbrot_color *colortable,
+	__write_only image2d_t cl_tex,
+	__global const mandelbrot_color *colorTable,
 	const unsigned int window_width,
 	const unsigned int window_height)
 {	
@@ -45,8 +46,20 @@ __kernel void mandelbrot_frame(
 	}
 
 	// Output black if we never finished, and a color from the look up table otherwise
-	mandelbrot_color black = { 0,0,0 };
-	int arrayIndex = (int)(window_width * windowPosY + windowPosX);
-	framebuffer[arrayIndex] = (iterations == max_iterations) ? black : colortable[iterations];
-	//printf("framebuffer[%u]: %f\n", arrayIndex, framebuffer[arrayIndex]);
+	//mandelbrot_color black = { 0,0,0 };
+
+	// Output black if we never finished, and a color from the look up table otherwise
+	if (iterations == max_iterations)
+	{
+		write_imagef(cl_tex, (int2)(windowPosX, windowPosY), (float4)(0.0, 0.0, 0.0, 1.0));
+	}
+	else
+	{
+
+		write_imagef(cl_tex, (int2)(windowPosX, windowPosY), (float4)
+			(
+				(float)(colorTable[iterations].red) / 255.0,
+				(float)(colorTable[iterations].green) / 255.0,
+				(float)(colorTable[iterations].blue) / 255.0, 1.0));
+	}
 }
