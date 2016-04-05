@@ -4,7 +4,8 @@
 #define __CL_ENABLE_EXCEPTIONS
 #include "CL/cl.hpp"
 
-#define NUM_PARTICLES (32*32)
+
+#define NUM_PARTICLES (32*32*32*32)
 #define WORKGROUP_SIZE 512
 
 // issue with using cl_float4 from cl_platform.h

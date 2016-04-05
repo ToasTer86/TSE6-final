@@ -1,8 +1,6 @@
 #include <stdio.h>
-
 #include "cll.h"
 #include "util.h"
-
 #include <vector>
 
 void CL::loadData(std::vector<Vec4> pos, std::vector<Vec4> vel, std::vector<Vec4> col)

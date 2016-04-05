@@ -13,7 +13,7 @@
 #include <sstream>
 #include <iomanip>
 #include <math.h>
-
+#include "cpu_particle.h"
 
 //OpenGL stuff
 #include <GL/glew.h>
@@ -25,6 +25,7 @@
 
 //Our OpenCL Particle Systemclass
 #include "cll.h"
+#include <iostream>
 CL* example;
 
 //GL related variables
@@ -44,6 +45,8 @@ void timerCB(int ms);
 void appKeyboard(unsigned char key, int x, int y);
 void appMouse(int button, int state, int x, int y);
 void appMotion(int x, int y);
+char choice = NULL;
+float dt = .01f;
 
 //----------------------------------------------------------------------
 //quick random function to distribute our initial points
@@ -81,18 +84,13 @@ std::string getKernelSource(const char *filename)
 //----------------------------------------------------------------------
 int main(int argc, char** argv)
 {
+	std::cout << "Run program with CPU or GPU?" << std::endl;
+	std::cout << "G for GPU / C for CPU" << std::endl;
+	std::cin >> choice;
+
 	printf("Hello, OpenCL\n");
 	//Setup our GLUT window and OpenGL related things
 	//glut callback functions are setup here too
-	init_gl(argc, argv);
-
-	//initialize our CL object, this sets up the context
-	example = new CL();
-
-	//load and build our CL program from the file
-	std::string kernel_source;
-	kernel_source = getKernelSource("./part2.cl");
-	example->loadProgram(kernel_source);
 
 	//initialize our particle system with positions, velocities and color
 	int num = NUM_PARTICLES;
@@ -125,14 +123,47 @@ int main(int argc, char** argv)
 		color[i] = Vec4(r, g, b, 1.0f);
 	}
 
-	//our load data function sends our initial values to the GPU
-	example->loadData(pos, vel, color);
-	//initialize the kernel
-	example->popCorn();
+	if (choice == 'G')
+	{
+		init_gl(argc, argv);
 
-	//this starts the GLUT program, from here on out everything we want
-	//to do needs to be done in glut callback functions
-	glutMainLoop();
+		//initialize our CL object, this sets up the context
+		example = new CL();
+
+		//load and build our CL program from the file
+		std::string kernel_source;
+		kernel_source = getKernelSource("./part2.cl");
+		example->loadProgram(kernel_source);
+		//our load data function sends our initial values to the GPU
+		example->loadData(pos, vel, color);
+		//initialize the kernel
+		example->popCorn();
+
+
+		//this starts the GLUT program, from here on out everything we want
+		//to do needs to be done in glut callback functions
+		glutMainLoop();
+	}
+	else if(choice == 'C')
+	{
+		// Get current time before calculating the fractal
+		LARGE_INTEGER freq, start;
+		QueryPerformanceFrequency(&freq);
+		QueryPerformanceCounter(&start);
+
+		for (int i = 0; i < NUM_PARTICLES - 1; i++) 
+		{
+			cpuKernel(&pos[0], &color[0], &vel[0], dt, i);
+		}
+		// Get current time after calculating the fractal
+		LARGE_INTEGER end;
+		QueryPerformanceCounter(&end);
+
+		// Print elapsed time
+		printf("Elapsed time to calculate fractal: %f msec\n", (double)(end.QuadPart - start.QuadPart) / freq.QuadPart * 1000.0);
+
+		system("pause");
+	}
 
 }
 
