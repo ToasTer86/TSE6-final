@@ -8,8 +8,7 @@
 void CL::loadData(std::vector<Vec4> pos, std::vector<Vec4> vel, std::vector<Vec4> col)
 {
 	//store the number of particles and the size in bytes of our arrays
-	num = pos.size();
-	array_size = num * sizeof(Vec4);
+	array_size = pos.size() * sizeof(Vec4);
 	//create VBOs (defined in util.cpp)
 	p_vbo = createVBO(&pos[0], array_size, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 	c_vbo = createVBO(&col[0], array_size, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
@@ -83,7 +82,7 @@ void CL::runKernel()
 	float dt = .01f;
 	kernel.setArg(5, dt); //pass in the timestep
 						  //execute the kernel
-	err = queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(num), cl::NullRange, NULL, &event);
+	err = queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(NUM_PARTICLES), cl::NDRange(WORKGROUP_SIZE), NULL, &event);
 	//printf("clEnqueueNDRangeKernel: %s\n", oclErrorString(err));
 	queue.finish();
 

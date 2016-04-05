@@ -25,8 +25,6 @@
 
 //Our OpenCL Particle Systemclass
 #include "cll.h"
-
-#define NUM_PARTICLES 500000
 CL* example;
 
 //GL related variables
@@ -92,7 +90,6 @@ int main(int argc, char** argv)
 	example = new CL();
 
 	//load and build our CL program from the file
-//#include "part2.cl" //std::string kernel_source is defined in this file
 	std::string kernel_source;
 	kernel_source = getKernelSource("./part2.cl");
 	example->loadProgram(kernel_source);
@@ -122,7 +119,10 @@ int main(int argc, char** argv)
 		vel[i] = Vec4(0.0, 0.0, 3.0f, life_r);
 
 		//just make them red and full alpha
-		color[i] = Vec4(1.0f, 0.0f, 0.0f, 1.0f);
+		float r = rand() / (float)RAND_MAX;
+		float g = rand() / (float)RAND_MAX;
+		float b = rand() / (float)RAND_MAX;
+		color[i] = Vec4(r, g, b, 1.0f);
 	}
 
 	//our load data function sends our initial values to the GPU
@@ -167,7 +167,7 @@ void appRender()
 	glDisableClientState(GL_NORMAL_ARRAY);
 
 	//printf("draw arrays\n");
-	glDrawArrays(GL_POINTS, 0, example->num);
+	glDrawArrays(GL_POINTS, 0, NUM_PARTICLES);
 
 	//printf("disable stuff\n");
 	glDisableClientState(GL_COLOR_ARRAY);
@@ -189,7 +189,7 @@ void init_gl(int argc, char** argv)
 
 
 	std::stringstream ss;
-	ss << "Adventures in OpenCL: Part 2, " << NUM_PARTICLES << " particles" << std::ends;
+	ss << "Particle game of life with " << NUM_PARTICLES << " particles" << std::ends;
 	glutWindowHandle = glutCreateWindow(ss.str().c_str());
 
 	glutDisplayFunc(appRender); //main rendering function

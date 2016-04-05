@@ -1,9 +1,9 @@
 __kernel void part2(__global float4* pos, 
-				__global float4* color, 
-				__global float4* vel, 
-				__global float4* pos_gen,
-				__global float4* vel_gen, 
-				float dt)
+					__global float4* color, 
+					__global float4* vel, 
+					__global float4* pos_gen,
+					__global float4* vel_gen, 
+					float dt)
 {
     //get our index in the array
     unsigned int i = get_global_id(0);
@@ -39,14 +39,6 @@ __kernel void part2(__global float4* pos,
 
     //you can manipulate the color based on properties of the system
     //here we adjust the alpha
-	if(i == 1) {
-		color[i].x = 1;
-		color[i].y = 1; 
-		color[i].z = 1; 
-		color[i].w = 1; 
-	}
-	else
-	{ 
-		color[i].w = life;
-	}
+
+    color[i].w = life;
 }

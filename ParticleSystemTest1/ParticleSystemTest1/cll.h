@@ -4,6 +4,9 @@
 #define __CL_ENABLE_EXCEPTIONS
 #include "CL/cl.hpp"
 
+#define NUM_PARTICLES (512*512)
+#define WORKGROUP_SIZE 512
+
 // issue with using cl_float4 from cl_platform.h
 // http://www.khronos.org/message_boards/viewtopic.php?f=28&t=1848
 // typedef cl_float cl_float4 __attribute__ ((__vector_size__ (16), __may_alias__));
@@ -34,10 +37,8 @@ public:
 	cl::Buffer cl_velocities;  //particle velocities
 	cl::Buffer cl_pos_gen;  //want to have the start points for reseting particles
 	cl::Buffer cl_vel_gen;  //want to have the start velocities for reseting particles
-
 	int p_vbo;   //position vbo
 	int c_vbo;   //colors vbo
-	int num;    //the number of particles
 	size_t array_size; //the size of our arrays num * sizeof(Vec4)
 
 					   //default constructor initializes OpenCL context and automatically chooses platform and device
