@@ -82,15 +82,16 @@ void CL::runKernel()
 	float dt = .01f;
 	kernel.setArg(5, dt); //pass in the timestep
 						  //execute the kernel
-	err = queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(NUM_PARTICLES), cl::NDRange(WORKGROUP_SIZE), NULL, &event);
+	cl::Event kernelExecution;
+	err = queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(NUM_PARTICLES), cl::NDRange(WORKGROUP_SIZE), NULL, &kernelExecution);
 	//printf("clEnqueueNDRangeKernel: %s\n", oclErrorString(err));
+	kernelExecution.wait();
 	queue.finish();
 
+	float executionTime = (float)(kernelExecution.getProfilingInfo<CL_PROFILING_COMMAND_END>() - kernelExecution.getProfilingInfo<CL_PROFILING_COMMAND_START>());
+	printf("Kernel execution took %f msec\n", executionTime / 1000000);
 	//Release the VBOs so OpenGL can play with them
 	err = queue.enqueueReleaseGLObjects(&cl_vbos, NULL, &event);
 	//printf("release gl: %s\n", oclErrorString(err));
 	queue.finish();
-
 }
-
-

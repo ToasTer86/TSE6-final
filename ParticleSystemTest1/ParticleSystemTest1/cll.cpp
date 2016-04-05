@@ -39,7 +39,7 @@ CL::CL()
 
 	//create the command queue we will use to execute OpenCL commands
 	try {
-		queue = cl::CommandQueue(context, devices[deviceUsed], 0, &err);
+		queue = cl::CommandQueue(context, devices[deviceUsed], CL_QUEUE_PROFILING_ENABLE, &err);
 	}
 	catch (cl::Error er) {
 		printf("ERROR: %s(%d)\n", er.what(), er.err());
