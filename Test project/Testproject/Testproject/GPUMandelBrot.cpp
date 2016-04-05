@@ -189,6 +189,11 @@ int main(int argc, char** argv){
 	kernel = clCreateKernel(program, "mandelbrot_frame", &ret);
 	checkError(ret, "could not create kernel");
 
+	// Enqueue ND range kernel
+	size_t globalSize[] = { WIDTH, HEIGHT };
+	ret = clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, globalSize, localSize, 0, NULL, NULL);
+	checkError(ret, "Could not enqueue 2D range on kernel");
+
 	// Set kernel arguments //
 	ret = clSetKernelArg(kernel, 0, sizeof(float), &OFFSET_X);
 	checkError(ret, "could not set variable 'OFFSET_X'");
@@ -213,11 +218,6 @@ int main(int argc, char** argv){
 
 	ret = clSetKernelArg(kernel, 7, sizeof(unsigned int), &HEIGHT);
 	checkError(ret, "could not set variable 'HEIGHT'");
-
-	// Enqueue ND range kernel
-	size_t globalSize[] = { WIDTH, HEIGHT };
-	ret = clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, globalSize, localSize, 0, NULL, NULL);
-	checkError(ret, "Could not enqueue 2D range on kernel");
 
 	// Enqueue readbuffer
 	ret = clEnqueueReadBuffer(command_queue, framebufferOnDevice, CL_TRUE, 0, WIDTH*HEIGHT*sizeof(mandelbrot_color), frameBuffer, 0, NULL, NULL);
