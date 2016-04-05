@@ -187,6 +187,9 @@
     <ClInclude Include="opencl_utils.h" />
     <ClInclude Include="openGL_functions.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Intel_OpenCL_Build_Rules Include="particle.cl" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\IntelOpenCL.targets" />
