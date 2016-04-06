@@ -46,5 +46,8 @@
     <Intel_OpenCL_Build_Rules Include="particle.cl">
       <Filter>OpenCL Files</Filter>
     </Intel_OpenCL_Build_Rules>
+    <Intel_OpenCL_Build_Rules Include="Particle2.cl">
+      <Filter>OpenCL Files</Filter>
+    </Intel_OpenCL_Build_Rules>
   </ItemGroup>
 </Project>

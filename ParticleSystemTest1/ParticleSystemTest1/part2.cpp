@@ -40,7 +40,7 @@ void CL::popCorn()
 	printf("in popCorn\n");
 	//initialize our kernel from the program
 	try {
-		kernel = cl::Kernel(program, "particle", &err);
+		kernel = cl::Kernel(program, "particle2", &err);
 	}
 	catch (cl::Error er) {
 		printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));

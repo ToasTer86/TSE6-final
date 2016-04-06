@@ -192,6 +192,7 @@
   </ItemGroup>
   <ItemGroup>
     <Intel_OpenCL_Build_Rules Include="particle.cl" />
+    <Intel_OpenCL_Build_Rules Include="Particle2.cl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

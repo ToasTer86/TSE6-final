@@ -176,7 +176,7 @@ int main(int argc, char** argv)
 		example = new CL();
 		//load and build our CL program from the file
 		std::string kernel_source;
-		kernel_source = getKernelSource("./particle.cl");
+		kernel_source = getKernelSource("./particle2.cl");
 		example->loadProgram(kernel_source);
 		//our load data function sends our initial values to the GPU
 		example->loadData(pos, vel, color);
