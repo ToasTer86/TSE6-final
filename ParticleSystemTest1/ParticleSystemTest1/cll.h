@@ -4,10 +4,6 @@
 #define __CL_ENABLE_EXCEPTIONS
 #include "CL/cl.hpp"
 
-
-#define NUM_PARTICLES (32*32*32*32)
-#define WORKGROUP_SIZE 512
-
 // issue with using cl_float4 from cl_platform.h
 // http://www.khronos.org/message_boards/viewtopic.php?f=28&t=1848
 // typedef cl_float cl_float4 __attribute__ ((__vector_size__ (16), __may_alias__));
@@ -54,7 +50,7 @@ public:
 	//these are implemented in part1.cpp (in the future we will make these more general)
 	void popCorn();
 	//execute the kernel
-	void runKernel();
+	void runKernel(int workgroupsize, double particles);
 
 	//    real coders bare all
 	//    private:

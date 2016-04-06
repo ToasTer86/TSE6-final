@@ -1,4 +1,4 @@
-__kernel void part2(__global float4* pos, 
+__kernel void particle(__global float4* pos, 
 				__global float4* color, 
 				__global float4* vel, 
 				__global float4* pos_gen,

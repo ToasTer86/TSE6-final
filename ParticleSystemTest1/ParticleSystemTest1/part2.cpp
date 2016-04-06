@@ -39,10 +39,8 @@ void CL::popCorn()
 {
 	printf("in popCorn\n");
 	//initialize our kernel from the program
-	//kernel = clCreateKernel(program, "part1", &err);
-	//printf("clCreateKernel: %s\n", oclErrorString(err));
 	try {
-		kernel = cl::Kernel(program, "part2", &err);
+		kernel = cl::Kernel(program, "particle", &err);
 	}
 	catch (cl::Error er) {
 		printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
@@ -66,7 +64,7 @@ void CL::popCorn()
 
 
 
-void CL::runKernel()
+void CL::runKernel(int workgroupsize, double particles)
 {
 	//this will update our system by calculating new velocity and updating the positions of our particles
 	//Make sure OpenGL is done using our VBOs
@@ -81,7 +79,7 @@ void CL::runKernel()
 	kernel.setArg(5, dt); //pass in the timestep
 						  //execute the kernel
 	cl::Event kernelExecution;
-	err = queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(NUM_PARTICLES), cl::NDRange(WORKGROUP_SIZE), NULL, &kernelExecution);
+	err = queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(particles), cl::NDRange(workgroupsize), NULL, &kernelExecution);
 	//printf("clEnqueueNDRangeKernel: %s\n", oclErrorString(err));
 	kernelExecution.wait();
 	queue.finish();

@@ -29,8 +29,8 @@
 CL* example;
 
 //GL related variables
-int window_width = 1920;
-int window_height = 1080;
+int window_width = 800;
+int window_height = 600;
 int glutWindowHandle = 0;
 float translate_z = -1.f;
 // mouse controls
@@ -40,13 +40,51 @@ float rotate_x = 0.0, rotate_y = 0.0;
 //main app helper functions
 void init_gl(int argc, char** argv);
 void appRender();
-void appDestroy();
+int appDestroy();
 void timerCB(int ms);
 void appKeyboard(unsigned char key, int x, int y);
 void appMouse(int button, int state, int x, int y);
 void appMotion(int x, int y);
-char choice = NULL;
+
+float r = rand() / (float)RAND_MAX;
+float g = rand() / (float)RAND_MAX;
+float b = rand() / (float)RAND_MAX;
+
+std::vector<Vec4> color();
+
+char GPU_CPU_choice = NULL;
+int workgroupsize = NULL;
+double particles = NULL;
+
 float dt = .01f;
+
+void menuParticles(int value) {
+	switch (value) {
+	case 1:
+		particles = particles + 1024;
+		break;
+	case 2:
+		particles = particles - 1024;
+		break;
+	case 3:
+		r = 1.0;
+		g = 0.0f;
+		b = 0.0f;
+		break;
+	case 4:
+		r = 0.0f;
+		g = 0.0f;
+		b = 1.0f;
+		break;
+	case 5:
+		r = 0.0f;
+		g = 1.0f;
+		b = 0.0f;
+		break;
+
+	}
+}
+
 
 //----------------------------------------------------------------------
 //quick random function to distribute our initial points
@@ -86,14 +124,20 @@ int main(int argc, char** argv)
 {
 	std::cout << "Run program with CPU or GPU?" << std::endl;
 	std::cout << "G for GPU / C for CPU" << std::endl;
-	std::cin >> choice;
+	std::cin >> GPU_CPU_choice;
+
+	std::cout << "Configure the workgroupsize (multitudes of 8)" << std::endl;
+	std::cin >> workgroupsize;
+
+	std::cout << "Set the amount of particles (multitudes of 8)" << std::endl;
+	std::cin >> particles;
 
 	printf("Hello, OpenCL\n");
 	//Setup our GLUT window and OpenGL related things
 	//glut callback functions are setup here too
 
 	//initialize our particle system with positions, velocities and color
-	int num = NUM_PARTICLES;
+	int num = particles;
 	std::vector<Vec4> pos(num);
 	std::vector<Vec4> vel(num);
 	std::vector<Vec4> color(num);
@@ -102,7 +146,7 @@ int main(int argc, char** argv)
 	for (int i = 0; i < num; i++)
 	{
 		//distribute the particles in a random circle around z axis
-		float rad = rand_float(.2, .5);
+		float rad = rand_float(0.2, 0.6);
 		float x = rad*sin(2 * 3.14 * i / num);
 		float z = 0.0f;// -.1 + .2f * i/num;
 		float y = rad*cos(2 * 3.14 * i / num);
@@ -114,44 +158,42 @@ int main(int argc, char** argv)
 		//the life is the lifetime of the particle: 1 = alive 0 = dead
 		//as you will see in part2.cl we reset the particle when it dies
 		float life_r = rand_float(0.f, 1.f);
-		vel[i] = Vec4(0.0, 0.0, 3.0f, life_r);
+		vel[i] = Vec4(1.0, 2.0, 3.0f, life_r);
+
 
 		//just make them red and full alpha
-		float r = rand() / (float)RAND_MAX;
-		float g = rand() / (float)RAND_MAX;
-		float b = rand() / (float)RAND_MAX;
+		float r = 1.0f; //rand() / (float)RAND_MAX;
+		float g = 0.0f; //rand() / (float)RAND_MAX;
+		float b = 0.0f; // rand() / (float)RAND_MAX; 
 		color[i] = Vec4(r, g, b, 1.0f);
 	}
 
-	if (choice == 'G')
+	if (GPU_CPU_choice == 'G')
 	{
 		init_gl(argc, argv);
 
 		//initialize our CL object, this sets up the context
 		example = new CL();
-
 		//load and build our CL program from the file
 		std::string kernel_source;
-		kernel_source = getKernelSource("./part2.cl");
+		kernel_source = getKernelSource("./particle.cl");
 		example->loadProgram(kernel_source);
 		//our load data function sends our initial values to the GPU
 		example->loadData(pos, vel, color);
 		//initialize the kernel
 		example->popCorn();
-
-
 		//this starts the GLUT program, from here on out everything we want
 		//to do needs to be done in glut callback functions
 		glutMainLoop();
 	}
-	else if(choice == 'C')
+	else if(GPU_CPU_choice == 'C')
 	{
 		// Get current time before calculating the fractal
 		LARGE_INTEGER freq, start;
 		QueryPerformanceFrequency(&freq);
 		QueryPerformanceCounter(&start);
 
-		for (int i = 0; i < NUM_PARTICLES - 1; i++) 
+		for (int i = 0; i < particles - 1; i++)
 		{
 			cpuKernel(&pos[0], &color[0], &vel[0], dt, i);
 		}
@@ -160,9 +202,10 @@ int main(int argc, char** argv)
 		QueryPerformanceCounter(&end);
 
 		// Print elapsed time
-		printf("Elapsed time to calculate fractal: %f msec\n", (double)(end.QuadPart - start.QuadPart) / freq.QuadPart * 1000.0);
+		printf("Elapsed time to calculate all pixels: %f msec\n", (double)(end.QuadPart - start.QuadPart) / freq.QuadPart * 1000.0);
 
 		system("pause");
+		return main(1, NULL);
 	}
 
 }
@@ -174,7 +217,7 @@ void appRender()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//this updates the particle system by calling the kernel
-	example->runKernel();
+	example->runKernel(workgroupsize, particles);
 
 	//render the particles from VBOs
 	glEnable(GL_BLEND);
@@ -198,7 +241,7 @@ void appRender()
 	glDisableClientState(GL_NORMAL_ARRAY);
 
 	//printf("draw arrays\n");
-	glDrawArrays(GL_POINTS, 0, NUM_PARTICLES);
+	glDrawArrays(GL_POINTS, 0, particles);
 
 	//printf("disable stuff\n");
 	glDisableClientState(GL_COLOR_ARRAY);
@@ -220,7 +263,7 @@ void init_gl(int argc, char** argv)
 
 
 	std::stringstream ss;
-	ss << "Particle game of life with " << NUM_PARTICLES << " particles" << std::ends;
+	ss << "Particle game of life with " << particles << " particles" << std::ends;
 	glutWindowHandle = glutCreateWindow(ss.str().c_str());
 
 	glutDisplayFunc(appRender); //main rendering function
@@ -242,17 +285,25 @@ void init_gl(int argc, char** argv)
 	glLoadIdentity();
 	gluPerspective(90.0, (GLfloat)window_width / (GLfloat)window_height, 0.1, 1000.0);
 
+	glutCreateMenu(menuParticles);
+	glutAddMenuEntry(" 1024 More particles", 1);
+	glutAddMenuEntry(" 1024 Less particles", 2);
+	glutAddMenuEntry("Red", 3);
+	glutAddMenuEntry("Blue", 4);
+	glutAddMenuEntry("Green", 5);
+
 	// set view matrix
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glTranslatef(0.0, 0.0, translate_z);
 
+	glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
 
 
 //----------------------------------------------------------------------
-void appDestroy()
+int appDestroy()
 {
 	//this makes sure we properly cleanup our OpenCL context
 	delete example;
@@ -283,6 +334,7 @@ void appKeyboard(unsigned char key, int x, int y)
 	case 'Q':    // Q quits
 	case 'q':    // q (or escape) quits
 				 // Cleanup up and quit
+	case 'r': 
 		appDestroy();
 		break;
 	}

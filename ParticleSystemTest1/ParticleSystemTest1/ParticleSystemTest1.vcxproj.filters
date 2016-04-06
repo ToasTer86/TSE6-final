@@ -43,10 +43,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Intel_OpenCL_Build_Rules Include="part2Original.cl">
-      <Filter>OpenCL Files</Filter>
-    </Intel_OpenCL_Build_Rules>
-    <Intel_OpenCL_Build_Rules Include="part2.cl">
+    <Intel_OpenCL_Build_Rules Include="particle.cl">
       <Filter>OpenCL Files</Filter>
     </Intel_OpenCL_Build_Rules>
   </ItemGroup>
