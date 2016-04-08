@@ -11,17 +11,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sstream>
-#include <iomanip>
 #include <math.h>
 #include "cpu_particle.h"
 
 //OpenGL stuff
 #include <GL/glew.h>
-#if defined __APPLE__ || defined(MACOSX)
-#include <GLUT/glut.h>
-#else
 #include <GL/glut.h>
-#endif
 
 //Our OpenCL Particle Systemclass
 #include "cll.h"
@@ -53,6 +48,8 @@ float b = rand() / (float)RAND_MAX;
 
 std::vector<Vec4> color();
 
+std::string kernelToRun;
+char kernel_choice = NULL;
 char GPU_CPU_choice = NULL;
 int workgroupsize = NULL;
 double particles = NULL;
@@ -119,19 +116,52 @@ std::string getKernelSource(const char *filename)
 	return std::string(program_buffer);
 }
 
-
-//----------------------------------------------------------------------
-int main(int argc, char** argv)
+void ConfigureKernel1()
 {
 	std::cout << "Run program with CPU or GPU?" << std::endl;
 	std::cout << "G for GPU / C for CPU" << std::endl;
 	std::cin >> GPU_CPU_choice;
 
-	std::cout << "Configure the workgroupsize (multitudes of 8)" << std::endl;
+
+	std::cout << "Configure the workgroupsize (multitudes of 2)" << std::endl;
 	std::cin >> workgroupsize;
 
-	std::cout << "Set the amount of particles (multitudes of 8)" << std::endl;
+	std::cout << "Set the amount of particles (multitudes of 2)" << std::endl;
 	std::cin >> particles;
+}
+
+void ConfigureKernel2()
+{
+	GPU_CPU_choice = 'G';
+
+	std::cout << "Configure the workgroupsize (multitudes of 2, maximum 16)" << std::endl;
+	std::cin >> workgroupsize;
+
+	std::cout << "Set the amount of particles (multitudes of 2, must be at least twice the workgroup size)" << std::endl;
+	std::cin >> particles;
+}
+
+//----------------------------------------------------------------------
+int main(int argc, char** argv)
+{
+	std::cout << "Which kernel would you like to run?" << std::endl;
+	std::cout << "Options: 1, 2" << std::endl;
+	std::cin >> kernel_choice;
+
+	switch(kernel_choice)
+	{
+		case '1':
+			kernelToRun = "./particle.cl";
+			ConfigureKernel1();
+			break;
+		case '2':
+			kernelToRun = "./Particle2.cl";
+			ConfigureKernel2();
+			break;
+		default:
+			std::cout << "Unknown kernel, please restart" << std::endl;
+			return -1;
+	}
 
 	printf("Hello, OpenCL\n");
 	//Setup our GLUT window and OpenGL related things
@@ -177,7 +207,7 @@ int main(int argc, char** argv)
 		example = new CL();
 		//load and build our CL program from the file
 		std::string kernel_source;
-		kernel_source = getKernelSource("./particle.cl");
+		kernel_source = getKernelSource(kernelToRun.c_str());
 		example->loadProgram(kernel_source);
 		//our load data function sends our initial values to the GPU
 		example->loadData(pos, vel, color);
@@ -208,9 +238,7 @@ int main(int argc, char** argv)
 		system("pause");
 		return main(1, NULL);
 	}
-
 }
-
 
 //----------------------------------------------------------------------
 void appRender()
@@ -218,10 +246,13 @@ void appRender()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//this updates the particle system by calling the kernel
-	if ( i == 1)
+	if(kernelToRun == "./Particle2.cl")
+	{
+		example->runKernel(workgroupsize, particles / 2);
+	}
+	else
 	{
 		example->runKernel(workgroupsize, particles);
-		i++;
 	}
 
 	//render the particles from VBOs
@@ -259,7 +290,6 @@ void appRender()
 //----------------------------------------------------------------------
 void init_gl(int argc, char** argv)
 {
-
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitWindowSize(window_width, window_height);
