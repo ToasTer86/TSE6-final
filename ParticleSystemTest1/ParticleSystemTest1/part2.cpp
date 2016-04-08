@@ -65,19 +65,8 @@ void CL::popCorn()
 
 
 
-void CL::runKernel(int workgroupsize, double particles)
+float* CL::runKernel(int workgroupsize, double particles, float* executiontime)
 {
-	// we will run the program for 10 seconds
-	std::clock_t start;
-	double duration = 0;
-	long long amountOfExecutions = 0; 
-	float average_executiontime = 0;
-	long long i = 0;
-	float executiontime[1000];
-
-	start = clock();
-	duration = (clock() - start) / (double)CLOCKS_PER_SEC;
-	printf("duration %F:", duration);
 
 	//this will update our system by calculating new velocity and updating the positions of our particles
 	//Make sure OpenGL is done using our VBOs
@@ -97,19 +86,14 @@ void CL::runKernel(int workgroupsize, double particles)
 	kernelExecution.wait();
 	queue.finish();
 
-	amountOfExecutions++;
-	executiontime[amountOfExecutions] = (float)(kernelExecution.getProfilingInfo<CL_PROFILING_COMMAND_END>() - kernelExecution.getProfilingInfo<CL_PROFILING_COMMAND_START>());
+	*executiontime = (float)(kernelExecution.getProfilingInfo<CL_PROFILING_COMMAND_END>() - kernelExecution.getProfilingInfo<CL_PROFILING_COMMAND_START>());
+	*executiontime = *executiontime / 1000000;
+
 	//Release the VBOs so OpenGL can play with them
 	err = queue.enqueueReleaseGLObjects(&cl_vbos, NULL, &event);
 	//printf("release gl: %s\n", oclErrorString(err));
 	queue.finish();
 
-		for (i < amountOfExecutions; i++;)
-		{
-			average_executiontime += executiontime[i];
- 		}
-		average_executiontime = average_executiontime / amountOfExecutions;
-		printf("In the last 10 seconds the average kernel execution time was: %f msec", average_executiontime);
-		i = 0;
-		duration = 0;
+	return executiontime;
+
 }

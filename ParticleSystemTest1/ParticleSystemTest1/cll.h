@@ -50,7 +50,7 @@ public:
 	//these are implemented in part1.cpp (in the future we will make these more general)
 	void popCorn();
 	//execute the kernel
-	void runKernel(int workgroupsize, double particles);
+	float* runKernel(int workgroupsize, double particles, float* executiontime);
 
 	//    real coders bare all
 	//    private:

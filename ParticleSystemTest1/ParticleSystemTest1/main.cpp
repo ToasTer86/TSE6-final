@@ -45,7 +45,6 @@ void timerCB(int ms);
 void appKeyboard(unsigned char key, int x, int y);
 void appMouse(int button, int state, int x, int y);
 void appMotion(int x, int y);
-int i = 1;
 
 float r = rand() / (float)RAND_MAX;
 float g = rand() / (float)RAND_MAX;
@@ -56,6 +55,14 @@ std::vector<Vec4> color();
 char GPU_CPU_choice = NULL;
 int workgroupsize = NULL;
 double particles = NULL;
+
+//variables being used for measuring the timing:
+double duration = 0;
+long long amountOfExecutions = 0;
+float average_executiontime = 0;
+long long i = 0;
+float executiontime[500];
+float startTime;
 
 float dt = .01f;
 
@@ -85,7 +92,6 @@ void menuParticles(int value) {
 
 	}
 }
-
 
 //----------------------------------------------------------------------
 //quick random function to distribute our initial points
@@ -118,7 +124,6 @@ std::string getKernelSource(const char *filename)
 
 	return std::string(program_buffer);
 }
-
 
 //----------------------------------------------------------------------
 int main(int argc, char** argv)
@@ -218,11 +223,10 @@ void appRender()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//this updates the particle system by calling the kernel
-	if ( i == 1)
-	{
-		example->runKernel(workgroupsize, particles);
-		i++;
-	}
+
+	example->runKernel(workgroupsize, particles, &executiontime[amountOfExecutions]);
+
+	//printf("Kernel execution time took %f\n msec", executiontime[amountOfExecutions]);
 
 	//render the particles from VBOs
 	glEnable(GL_BLEND);
@@ -272,7 +276,7 @@ void init_gl(int argc, char** argv)
 	glutWindowHandle = glutCreateWindow(ss.str().c_str());
 
 	glutDisplayFunc(appRender); //main rendering function
-	glutTimerFunc(30, timerCB, 30); //determin a minimum time between frames
+	glutTimerFunc(20, timerCB, 20); //determin a minimum time between frames
 	glutKeyboardFunc(appKeyboard);
 	glutMouseFunc(appMouse);
 	glutMotionFunc(appMotion);
@@ -322,9 +326,23 @@ int appDestroy()
 //----------------------------------------------------------------------
 void timerCB(int ms)
 {
+	amountOfExecutions ++; 
+
+	if (amountOfExecutions == 500)
+	{
+		for (int i = 0; i < amountOfExecutions; i++)
+		{
+			average_executiontime += executiontime[i];
+		}
+		average_executiontime = average_executiontime / amountOfExecutions;
+		printf("Average execution time of kernel last 10 seconds is: %f msec \n", average_executiontime);
+		amountOfExecutions = 0;
+	}
+
 	//this makes sure the appRender function is called every ms miliseconds
 	glutTimerFunc(ms, timerCB, ms);
 	glutPostRedisplay();
+	
 }
 
 
