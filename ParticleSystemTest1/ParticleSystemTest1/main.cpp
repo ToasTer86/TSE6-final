@@ -45,6 +45,7 @@ void timerCB(int ms);
 void appKeyboard(unsigned char key, int x, int y);
 void appMouse(int button, int state, int x, int y);
 void appMotion(int x, int y);
+int i = 1;
 
 float r = rand() / (float)RAND_MAX;
 float g = rand() / (float)RAND_MAX;
@@ -176,7 +177,7 @@ int main(int argc, char** argv)
 		example = new CL();
 		//load and build our CL program from the file
 		std::string kernel_source;
-		kernel_source = getKernelSource("./particle2.cl");
+		kernel_source = getKernelSource("./particle.cl");
 		example->loadProgram(kernel_source);
 		//our load data function sends our initial values to the GPU
 		example->loadData(pos, vel, color);
@@ -217,7 +218,11 @@ void appRender()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//this updates the particle system by calling the kernel
-	example->runKernel(workgroupsize, particles);
+	if ( i == 1)
+	{
+		example->runKernel(workgroupsize, particles);
+		i++;
+	}
 
 	//render the particles from VBOs
 	glEnable(GL_BLEND);

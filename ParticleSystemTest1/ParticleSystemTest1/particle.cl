@@ -24,8 +24,8 @@ __kernel void particle(__global float4* pos, __global float4* color, __global fl
 	//update the velocity to be affected by "gravity" in the z direction
 	v.z -= 9.8f*dt;
 	//update the position with the new velocity
-	p.x += v.x*dt;
-	p.y += v.y*dt;
+	//p.x += v.x*dt;
+	//p.y += v.y*dt;
 	p.z += v.z*dt;
 	//store the updated life in the velocity array
 	v.w = life;

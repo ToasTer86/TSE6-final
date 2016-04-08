@@ -2,6 +2,7 @@
 #include "cll.h"
 #include "util.h"
 #include <vector>
+#include <ctime>
 
 void CL::loadData(std::vector<Vec4> pos, std::vector<Vec4> vel, std::vector<Vec4> col)
 {
@@ -40,7 +41,7 @@ void CL::popCorn()
 	printf("in popCorn\n");
 	//initialize our kernel from the program
 	try {
-		kernel = cl::Kernel(program, "particle2", &err);
+		kernel = cl::Kernel(program, "particle", &err);
 	}
 	catch (cl::Error er) {
 		printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
@@ -66,6 +67,18 @@ void CL::popCorn()
 
 void CL::runKernel(int workgroupsize, double particles)
 {
+	// we will run the program for 10 seconds
+	std::clock_t start;
+	double duration = 0;
+	long long amountOfExecutions = 0; 
+	float average_executiontime = 0;
+	long long i = 0;
+	float executiontime[1000];
+
+	start = clock();
+	duration = (clock() - start) / (double)CLOCKS_PER_SEC;
+	printf("duration %F:", duration);
+
 	//this will update our system by calculating new velocity and updating the positions of our particles
 	//Make sure OpenGL is done using our VBOs
 	glFinish();
@@ -84,10 +97,19 @@ void CL::runKernel(int workgroupsize, double particles)
 	kernelExecution.wait();
 	queue.finish();
 
-	float executionTime = (float)(kernelExecution.getProfilingInfo<CL_PROFILING_COMMAND_END>() - kernelExecution.getProfilingInfo<CL_PROFILING_COMMAND_START>());
-	printf("Kernel execution took %f msec\n", executionTime / 1000000);
+	amountOfExecutions++;
+	executiontime[amountOfExecutions] = (float)(kernelExecution.getProfilingInfo<CL_PROFILING_COMMAND_END>() - kernelExecution.getProfilingInfo<CL_PROFILING_COMMAND_START>());
 	//Release the VBOs so OpenGL can play with them
 	err = queue.enqueueReleaseGLObjects(&cl_vbos, NULL, &event);
 	//printf("release gl: %s\n", oclErrorString(err));
 	queue.finish();
+
+		for (i < amountOfExecutions; i++;)
+		{
+			average_executiontime += executiontime[i];
+ 		}
+		average_executiontime = average_executiontime / amountOfExecutions;
+		printf("In the last 10 seconds the average kernel execution time was: %f msec", average_executiontime);
+		i = 0;
+		duration = 0;
 }
