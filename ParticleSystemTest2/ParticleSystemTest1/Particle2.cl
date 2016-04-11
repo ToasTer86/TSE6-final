@@ -1,12 +1,13 @@
 __kernel void particle(__global float4* pos, __global float4* color, __global float4* vel, __global float4* pos_gen, __global float4* vel_gen, float dt)
 {
 	//get our index in the array
-	unsigned int i = get_global_id(0);
-	unsigned int i_secondary =  get_global_size(0) + i;
+	unsigned int i = get_global_id(0) * 2;
+	unsigned int i_secondary =  i + 1;
 
 	//copy position and velocity for this iteration to a local variable
 	float4 p = pos[i];
 	float4 p2 = pos[i_secondary];
+
 	float4 v = vel[i];
 	float4 v2 = vel[i_secondary];
 
@@ -42,7 +43,6 @@ __kernel void particle(__global float4* pos, __global float4* color, __global fl
 	//store the updated life in the velocity array
 	v.w = life;
 	v2.w = life2;
-
 
 	//update the arrays with our newly computed values
 	pos[i] = p;
