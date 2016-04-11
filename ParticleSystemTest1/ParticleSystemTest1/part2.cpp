@@ -4,10 +4,11 @@
 #include <vector>
 #include <ctime>
 
-void CL::loadData(std::vector<Vec4> pos, std::vector<Vec4> vel, std::vector<Vec4> col)
+//void CL::loadData(std::vector<Vec4> pos, std::vector<Vec4> vel, std::vector<Vec4> col)
+void CL::loadData(Vec4 pos[], Vec4 vel[], Vec4 col[], int num_particles)
 {
 	//store the number of particles and the size in bytes of our arrays
-	array_size = pos.size() * sizeof(Vec4);
+	array_size = num_particles * sizeof(Vec4);
 	//create VBOs (defined in util.cpp)
 	p_vbo = createVBO(&pos[0], array_size, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);
 	c_vbo = createVBO(&col[0], array_size, GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW);

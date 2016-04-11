@@ -46,7 +46,8 @@ public:
 	//load an OpenCL program from a string
 	void loadProgram(std::string kernel_source);
 	//setup the data for the kernel 
-	void loadData(std::vector<Vec4> pos, std::vector<Vec4> vel, std::vector<Vec4> color);
+	//void loadData(std::vector<Vec4> pos, std::vector<Vec4> vel, std::vector<Vec4> color);
+	void loadData(Vec4 pos[], Vec4 vel[], Vec4 color[], int num_particles);
 	//these are implemented in part1.cpp (in the future we will make these more general)
 	void popCorn();
 	//execute the kernel

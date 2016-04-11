@@ -45,8 +45,6 @@ float r = rand() / (float)RAND_MAX;
 float g = rand() / (float)RAND_MAX;
 float b = rand() / (float)RAND_MAX;
 
-std::vector<Vec4> color();
-
 std::string kernelToRun;
 char kernel_choice = NULL;
 char GPU_CPU_choice = NULL;
@@ -59,6 +57,10 @@ float average_executiontime = 0;
 float executiontime[500];
 
 float dt = .01f;
+
+Vec4 *pos = NULL;
+Vec4 *vel = NULL;
+Vec4 *color = NULL;
 
 void menuParticles(int value) {
 	switch (value) {
@@ -143,11 +145,20 @@ void ConfigureKernel2()
 	std::cin >> particles;
 }
 
+void ConfigureKernel3()
+{
+	ConfigureKernel2();
+}
+
 //----------------------------------------------------------------------
 int main(int argc, char** argv)
 {
 	std::cout << "Which kernel would you like to run?" << std::endl;
-	std::cout << "Options: 1, 2" << std::endl;
+	std::cout << "Options: 1, 2, 3" << std::endl;
+	std::cout << "Option 1: 1 particle calculated per kernel execution" << std::endl;
+	std::cout << "Option 2: 2 particles calculated per kernel execution" << std::endl;
+	std::cout << "Option 3: 2 particles calculated per kernel execution, memory coalescence accounted for" << std::endl;
+
 	std::cin >> kernel_choice;
 
 	switch(kernel_choice)
@@ -160,6 +171,10 @@ int main(int argc, char** argv)
 			kernelToRun = "./Particle2.cl";
 			ConfigureKernel2();
 			break;
+		case '3':
+			kernelToRun = "./particle3.cl";
+			ConfigureKernel3();
+			break;
 		default:
 			std::cout << "Unknown kernel, please restart" << std::endl;
 			return -1;
@@ -171,9 +186,13 @@ int main(int argc, char** argv)
 
 	//initialize our particle system with positions, velocities and color
 	int num = particles;
-	std::vector<Vec4> pos(num);
-	std::vector<Vec4> vel(num);
-	std::vector<Vec4> color(num);
+
+	//std::vector<Vec4> pos(num);
+	pos = new Vec4[num];
+	//std::vector<Vec4> vel(num);
+	vel = new Vec4[num];
+	//std::vector<Vec4> color(num);
+	color = new Vec4[num];
 
 	//fill our vectors with initial data
 	for (int i = 0; i < num; i++)
@@ -183,7 +202,7 @@ int main(int argc, char** argv)
 		float x = rad*sin(2 * 3.14 * i / num);
 		float z = 0.0f;// -.1 + .2f * i/num;
 		float y = rad*cos(2 * 3.14 * i / num);
-		pos[i] = Vec4(x, y, z, 1.0f);
+		pos[i].set(x, y, z, 1.0f);
 
 		//give some initial velocity 
 		//float xr = rand_float(-.1, .1);
@@ -191,14 +210,13 @@ int main(int argc, char** argv)
 		//the life is the lifetime of the particle: 1 = alive 0 = dead
 		//as you will see in part2.cl we reset the particle when it dies
 		float life_r = rand_float(0.f, 1.f);
-		vel[i] = Vec4(1.0, 2.0, 3.0f, life_r);
-
+		vel[i].set(1.0, 2.0, 3.0f, life_r);
 
 		//just make them red and full alpha
 		float r = 1.0f; //rand() / (float)RAND_MAX;
 		float g = 0.0f; //rand() / (float)RAND_MAX;
 		float b = 0.0f; // rand() / (float)RAND_MAX; 
-		color[i] = Vec4(r, g, b, 1.0f);
+		color[i].set(r, g, b, 1.0f);
 	}
 
 	if (GPU_CPU_choice == 'G')
@@ -212,7 +230,7 @@ int main(int argc, char** argv)
 		kernel_source = getKernelSource(kernelToRun.c_str());
 		example->loadProgram(kernel_source);
 		//our load data function sends our initial values to the GPU
-		example->loadData(pos, vel, color);
+		example->loadData(pos, vel, color, num);
 		//initialize the kernel
 		example->popCorn();
 		//this starts the GLUT program, from here on out everything we want
@@ -248,7 +266,7 @@ void appRender()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//this updates the particle system by calling the kernel
-	if(kernelToRun == "./Particle2.cl")
+	if(kernelToRun == "./Particle2.cl" || kernelToRun == "./particle3.cl")
 	{
 		example->runKernel(workgroupsize, particles / 2, &executiontime[amountOfExecutions]);
 	}
@@ -345,6 +363,11 @@ int appDestroy()
 	//this makes sure we properly cleanup our OpenCL context
 	delete example;
 	if (glutWindowHandle)glutDestroyWindow(glutWindowHandle);
+
+	printf("Freeing Vec4 arrays...");
+	free(pos);
+	free(vel);
+	free(color);
 	printf("about to exit!\n");
 
 	exit(0);
