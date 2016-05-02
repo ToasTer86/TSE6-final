@@ -43,8 +43,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="ContextOS.cs" />
+    <Compile Include="FCFSStrategy.cs" />
+    <Compile Include="IStrategy.cs" />
+    <Compile Include="CLI.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SSTFStrategy.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
