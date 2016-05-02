@@ -1,30 +1,54 @@
-﻿using Disk_Scheduler_Strategies;
+﻿using System;
+using System.Collections.Generic;
+using Disk_Scheduler_Strategies;
 
 namespace Disk_Scheduler_Context
 {
     class ContextOS
     {
-        private IStrategy strategy;
+        private IStrategy strategy = null;
+        private List<int> scheduledSearches = new List<int>();
+        private List<int> data = new List<int>();
 
         public ContextOS()
         {
-            //fill list
+            var random = new Random();
+            for (var i = 0; i < 100; i++)
+            {
+                var randomValue = random.Next(0, 100);
+                data.Add(randomValue);
+            }
         }
 
-        public void ChooseStrategy(IStrategy strategy)
+        public void ChooseStrategy(object inputStrategy)
         {
-            this.strategy = strategy;
+            var givenStrategy = inputStrategy as IStrategy;
+            if (givenStrategy != null)
+            {
+                strategy = givenStrategy;
+            }
         }
 
-        public void ReturnLastResult(out int index, out int result)
+        public void ReturnNextResult(out int index, out int result)
         {
-            index = 1;
-            result = 1;
+            index = -1;
+            result = -1;
+            if (strategy != null)
+            {
+                var searchResult = strategy.GetDataFromIndex(scheduledSearches, data);
+                index = searchResult.IndexOfResult;
+                result = searchResult.ValueOfResult;
+                scheduledSearches.Remove(index);
+            }
         }
 
-        public bool PerformSearch(int index)
+        public void ScheduleSearch(object index)
         {
-            return false;
+            var locationToSearch = index as int?;
+            if (locationToSearch != null)
+            {
+                scheduledSearches.Add(locationToSearch.Value);
+            }
         }
     }
 }

@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
+using Disk_Scheduler_SearchResult;
 
 namespace Disk_Scheduler_Strategies
 {
     interface IStrategy
     {
-        int GetDataFromIndex(List<int> index, List<int> data);
+        SearchResult GetDataFromIndex(List<int> index, List<int> data);
     }
 }
