@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Disk_Scheduler_Strategy_patterm
+namespace Disk_Scheduler
 {
     class Program
     {

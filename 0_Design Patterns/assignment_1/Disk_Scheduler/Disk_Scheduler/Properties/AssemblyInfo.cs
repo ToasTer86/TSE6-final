@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Disk_Scheduler_Strategy_patterm")]
+[assembly: AssemblyTitle("Disk_Scheduler")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Disk_Scheduler_Strategy_patterm")]
+[assembly: AssemblyProduct("Disk_Scheduler")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("2d17837b-f83b-4487-9f8a-8756aa6a03c1")]
+[assembly: Guid("f1ece88a-3bba-462b-801e-045219549d50")]
 
 // Version information for an assembly consists of the following four values:
 //

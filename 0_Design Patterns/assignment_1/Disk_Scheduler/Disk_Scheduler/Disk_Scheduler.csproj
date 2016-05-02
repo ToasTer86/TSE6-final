@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2D17837B-F83B-4487-9F8A-8756AA6A03C1}</ProjectGuid>
+    <ProjectGuid>{F1ECE88A-3BBA-462B-801E-045219549D50}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Disk_Scheduler_Strategy_patterm</RootNamespace>
-    <AssemblyName>Disk_Scheduler_Strategy_patterm</AssemblyName>
+    <RootNamespace>Disk_Scheduler</RootNamespace>
+    <AssemblyName>Disk_Scheduler</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
