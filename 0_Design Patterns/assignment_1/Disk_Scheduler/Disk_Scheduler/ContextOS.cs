@@ -12,10 +12,8 @@ namespace Disk_Scheduler_Context
 
         public ContextOS()
         {
-            var random = new Random();
             for (var i = 0; i < 100; i++)
             {
-                //var randomValue = random.Next(0, 100);
                 var randomValue = i*2;
                 data.Add(randomValue);
             }
