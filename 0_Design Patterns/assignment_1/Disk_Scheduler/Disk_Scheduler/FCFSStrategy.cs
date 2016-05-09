@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Disk_Scheduler_SearchResult;
 
 namespace Disk_Scheduler_Strategies
