@@ -8,7 +8,13 @@ namespace Disk_Scheduler_Strategies
     {
         public SearchResult GetDataFromIndex(List<int> index, List<int> data)
         {
-            throw new NotImplementedException();
+            if (index.Count > 0)
+            {
+                var indexToSearchAt = index[0];
+                var valueFound = data[indexToSearchAt];
+                return new SearchResult(indexToSearchAt, valueFound);
+            }
+            return new SearchResult(-1, -2);
         }
     }
 }

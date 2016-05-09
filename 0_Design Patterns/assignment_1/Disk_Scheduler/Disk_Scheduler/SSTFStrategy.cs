@@ -9,7 +9,23 @@ namespace Disk_Scheduler_Strategies
         private int currentIndex = 0;
         public SearchResult GetDataFromIndex(List<int> index, List<int> data)
         {
-            throw new NotImplementedException();
+            if (index.Count > 0)
+            {
+                var closestIndex = 0;
+                var closestDistance = data.Count;
+                foreach (var i in index)
+                {
+                    var distance = Math.Abs(i - currentIndex);
+                    if (distance < closestDistance)
+                    {
+                        closestDistance = distance;
+                        closestIndex = i;
+                    }
+                }
+                currentIndex = closestIndex;
+                return new SearchResult(currentIndex, data[currentIndex]);
+            }
+            return new SearchResult(-1, -2);
         }
     }
 }

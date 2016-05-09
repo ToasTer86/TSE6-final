@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ContextOS.cs" />
+    <Compile Include="CScanStrategy.cs" />
     <Compile Include="FCFSStrategy.cs" />
     <Compile Include="IStrategy.cs" />
     <Compile Include="CLI.cs" />
